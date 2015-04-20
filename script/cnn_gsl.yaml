@@ -1,0 +1,94 @@
+# author: Lei Wang
+
+!obj:pylearn2.train.Train {
+    dataset: &train !obj:imageTransformerDataset.TransformerDataset {
+        raw : !obj:sar_ima_dataset.SarImaDataset {
+            which_set: 'train',
+            base_folder: '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/',
+            data_file_list: 'train.txt',
+            preprocessor : !obj:preprocessing_standarize.Standardize {
+              mean_std_file: 'mean_std_gsl.pkl'},
+            fit_preprocessor: True,
+        },
+        transformer : !obj:transformer.TransformationPipeline { 
+            input_space: !obj:pylearn2.space.Conv2DSpace {
+                shape: [40, 40],
+                num_channels: 2,
+            },
+            transformations: [
+                !obj:transformer.Rotation {},
+                !obj:transformer.Flipping {}
+        ] },
+        space_preserving : True,
+    },
+    model: !obj:pylearn2.models.mlp.MLP {
+        batch_size: 128,
+        input_space: !obj:pylearn2.space.Conv2DSpace {
+            shape: [40, 40],
+            num_channels: 2
+        },
+        layers: [ !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+                     layer_name: 'h0',
+                     output_channels: 64,
+                     irange: .05,
+                     kernel_shape: [5, 5],
+                     pool_shape: [2, 2],
+                     pool_stride: [2, 2],
+                     max_kernel_norm: 1.9365,
+                 }, !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+                     layer_name: 'h1',
+                     output_channels: 128,
+                     irange: .05,
+                     kernel_shape: [5, 5],
+                     pool_shape: [2, 2],
+                     pool_stride: [2, 2],
+                     max_kernel_norm: 1.9365,
+                 }, !obj:pylearn2.models.mlp.RectifiedLinear {
+                     layer_name: 'f1',
+                     dim: 2048,
+                     istdev: 0.0005,
+                 }, !obj:pylearn2.models.mlp.Linear {
+                     layer_name: 'y',
+                     istdev: 0.0005,
+                     dim: 1,
+                 }
+                ],
+    },
+    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
+        batch_size: 128,
+        learning_rate: .001,
+        learning_rule: !obj:pylearn2.training_algorithms.learning_rule.Momentum {
+            init_momentum: .9
+        },
+        monitoring_dataset:
+            {
+                'train' : *train,
+                'valid'  : !obj:sar_ima_dataset.SarImaDataset {
+                              which_set: 'valid',
+                              base_folder: '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/',
+                              data_file_list: 'valid.txt',
+                              preprocessor : !obj:preprocessing_standarize.Standardize {
+                                mean_std_file: 'mean_std_gsl.pkl'},
+                              fit_preprocessor: False
+                          }
+            },
+        cost: !obj:pylearn2.costs.cost.SumOfCosts { costs: [
+              !obj:pylearn2.costs.cost.MethodCost {
+              method: 'cost_from_X',
+            },  !obj:pylearn2.costs.mlp.WeightDecay {
+                coeffs: [0.0002, 0.0002, 0.0002, 0.0002],
+            },
+            ],
+            },
+        train_iteration_mode: 'even_shuffled_sequential',
+        monitor_iteration_mode: 'even_shuffled_sequential',
+        termination_criterion: !obj:pylearn2.termination_criteria.EpochCounter {
+            max_epochs: 500
+        }
+    },
+    extensions:
+        [ !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+             channel_name: 'valid_objective',
+             save_path: "/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/gsl_conv_best.pkl"
+        }]
+}
