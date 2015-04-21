@@ -33,7 +33,6 @@ class SarImaDataset(DenseDesignMatrix):
             X, y = load_data(base_folder, data_file_list)
           
         self.__dict__.update(locals())
-        # import pdb; pdb.set_trace()
         super(SarImaDataset,self).__init__(topo_view=X,y=y,axes = ('b', 0, 1,'c'))
         if self.X is not None and preprocessor:
             preprocessor.apply(self, fit_preprocessor)

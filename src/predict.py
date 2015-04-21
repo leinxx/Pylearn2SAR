@@ -58,7 +58,6 @@ def sar_predict(ann,image,outfile):
     yaml_src = ann.dataset_yaml_src.split()
     mean_std_file = yaml_src[yaml_src.index('mean_std_file:')+1]
     mean_std_file = re.search('\w+...\w+', mean_std_file).group(0)
-
     preprocessor = Standardize(mean_std_file = mean_std_file)
     # ann.set_batch_size(batch_size)
     m = len(jcol)*len(irow)
@@ -73,9 +72,9 @@ def sar_predict(ann,image,outfile):
             subimgs[j-i,:] = image[:,pos[0]-rl:pos[0]+rr,pos[1]-rl:pos[1]+rr]
         #the default input_space for pylearn convnet is (b,0,1,c)
         #the axis of subimgs should be permuted
-        batch = DenseDesignMatrix(X = np.transpose(subimgs,(0,2,3,1)))
+        batch = DenseDesignMatrix(topo_view = np.transpose(subimgs,(0,2,3,1)), axes = ('b', 0, 1, 'c'))
         preprocessor.apply(batch)
-        im_pred_tmp[i:i+batch_size,:] = f(batch.X)
+        im_pred_tmp[i:i+batch_size,:] = f(batch.get_topological_view())
     im_pred_tmp = np.transpose(im_pred_tmp);
     im_pred_tmp = im_pred_tmp.reshape(im_pred_tmp.shape[0],nrow,ncol)
 
@@ -92,7 +91,7 @@ def sar_predict(ann,image,outfile):
 
     im_pred = np.zeros(shape=(im_pred_tmp.shape[0],image.shape[1],image.shape[2]))
     im_pred[:,rl:image.shape[1]-rr,rl:image.shape[2]-rr]=im_pred_tmp
-    np.save(outfile+".pyn",im_pred)
+    # np.save(outfile+".pyn",im_pred)
     WriteArrayToTiff(im_pred,outfile)
     print 'prediction max is {}'.format(im_pred.max())
 
@@ -163,7 +162,7 @@ def test():
 
 if __name__ == '__main__':
     import sys
-    if len(sys.argv != 4):
+    if len(sys.argv) != 4:
       print '''Usage: ./predict ann_file input_images output_dir
         ann_file:
         input_images: a txt file with each input scene as one line, 
@@ -177,9 +176,10 @@ if __name__ == '__main__':
       ann_file = sys.argv[1]
       input_images = sys.argv[2]
       output_dir = sys.argv[3]
-      ann = cPickle.load(ann_file)
-      infiles = open(input_images,'r').readlines()
+      if not os.path.exists(output_dir):
+          os.makedirs(output_dir)
+      inlines = open(input_images,'r').readlines()
       infiles = [line.strip().split() for line in inlines]
       for f in infiles:
-          output_file = output_dir + '/' + f[0].split('.')[0:-1] + '.predict.tif'
-          predict_image(ann, f, output_file)
+          output_file = output_dir + '/' + f[0].split('/')[-1].split('.')[-2] + '.predict.tif'
+          predict_from_file(ann_file, f, output_file)

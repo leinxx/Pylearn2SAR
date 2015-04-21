@@ -7,7 +7,7 @@
             base_folder: '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/',
             data_file_list: 'train.txt',
             preprocessor : !obj:preprocessing_standarize.Standardize {
-              mean_std_file: 'mean_std_gsl.pkl'},
+              mean_std_file: '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/mean_std_gsl.pkl'}, #it has to be full file path 
             fit_preprocessor: True,
         },
         transformer : !obj:transformer.TransformationPipeline { 
@@ -68,7 +68,7 @@
                               base_folder: '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/',
                               data_file_list: 'valid.txt',
                               preprocessor : !obj:preprocessing_standarize.Standardize {
-                                mean_std_file: 'mean_std_gsl.pkl'},
+                                mean_std_file: '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/mean_std_gsl.pkl'},
                               fit_preprocessor: False
                           }
             },
