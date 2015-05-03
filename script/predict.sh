@@ -1,0 +1,1 @@
+../src/predict.py /home/lein/Work/sar_dnn/dataset/beaufort_gsl/gsl_conv_best_3conv.pkl /home/lein/Work/sar_dnn/dataset/beaufort_gsl/predict.txt /home/lein/Work/sar_dnn/beaufort_gsl/predict_full_pooling

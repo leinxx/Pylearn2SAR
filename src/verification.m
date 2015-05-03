@@ -38,11 +38,12 @@ function verification()
 end
 
 function [el1_train,esig_train,std_train] = run_verification(window,set)
-    pred_dir = '0/';
-    pred_dir = 'SFCRF/data/';
+    
+    pred_dir = '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/predict/';
     mask_dir = '~/Work/Sea_ice/gsl2014_hhv_ima/mask/';
-    ima_dir = '../dataset/gsl2014_40/ima_used/';
-    fid = fopen([set '.txt']);
+    ima_dir = '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/ima_used/';
+    base_dir = '/home/lein/Work/sar_dnn/dataset/gsl2014_land_free_40/';
+    fid = fopen([base_dir set '.txt']);
     days = [];
     str = fgets(fid);
     while ischar(str)
@@ -51,14 +52,14 @@ function [el1_train,esig_train,std_train] = run_verification(window,set)
         str = fgets(fid);
     end
 
-    %fns = strcat(pred_dir,days,'-ic.tif'); 
-    fns = strcat(pred_dir,days,'-x1.mat');
+    fns = strcat(pred_dir,days,'-HH-8by8-mat.predict.tif'); 
+    %fns = strcat(pred_dir,days,'-x1.mat');
     stats = zeros(size(fns,1),4);
     ad = [];
     for i = 1:size(fns,1)   
-        %im = imread(fns(i,:));%read prediction reuslts
-        load(fns(i,:))
-        im = 2-x;
+        im = imread(fns(i,:));%read prediction reuslts
+        %load(fns(i,:))
+        %im = 2-x;
         im(im>1)=1;
         im(im<0)=0;
         disp( fns(i,:))
@@ -108,36 +109,14 @@ function [el1_train,esig_train,std_train] = run_verification(window,set)
 end
 
 function [C, order] = run_verification_quantilize(window,which_set)
-    pred_dir = ['~/Work/deeplearning/sar_dnn/output/train_with_2010_' num2str(window) '/'];
-    pred_dir = ['~/Work/deeplearning/sar_dnn/output/train_with_2010_2l_32_12/'];
-    pred_dir = ['~/Work/deeplearning/sar_dnn/output/train_with_2010_2l_40/'];
-    pred_dir = ['~/Work/deeplearning/sar_dnn/output/train_with_2010_2l_40_64/original_500/0/'];
+    pred_dir = ['~/Work/sar_dnn/dataset/gsl2014_land_free_40/predict/'];
     
-    %pred_dir = ['~/Work/deeplearning/sar_dnn/output/train_with_2010_2l_40_64/augment/0/'];
-    days=[20100730,
-        20100806,
-        20100822,
-        20100829,
-        20100909,
-        20100929,
-        20101003,
-        20101006,
-        20101008,
-        20110709,
-        20110710,
-        20110720,
-        20110817,
-        20110725,
-        20110811,
-        ]; 
+    
     days = num2str(days);
     traindays = days(1:13,:);
     testdays=days(14,:);
     validdays=days(15,:);  
     
-    %traindays = days(1:9,:);
-    %testdays=days(10:12,:);
-    %validdays=days(13:15,:);
     if strcmp(which_set,'train')
         days = traindays;
     elseif strcmp(which_set,'valid')

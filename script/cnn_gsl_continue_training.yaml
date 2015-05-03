@@ -8,7 +8,7 @@
             data_file_list: 'train.txt',
             preprocessor : !obj:preprocessing_standarize.Standardize {
               mean_std_file: '/home/lein/Work/sar_dnn/dataset/beaufort_gsl/mean_std_gsl_3conv.pkl'}, #it has to be full file path 
-            fit_preprocessor: True,
+            fit_preprocessor: False,
         },
         transformer : !obj:transformer.TransformationPipeline { 
             input_space: !obj:pylearn2.space.Conv2DSpace {
@@ -21,43 +21,9 @@
         ] },
         space_preserving : True,
     },
-    model: !obj:pylearn2.models.mlp.MLP {
-        batch_size: 128,
-        input_space: !obj:pylearn2.space.Conv2DSpace {
-            shape: [40, 40],
-            num_channels: 2
-        },
-        layers: [ !obj:pylearn2.models.mlp.ConvRectifiedLinear {
-                     layer_name: 'h0',
-                     output_channels: 64,
-                     irange: .05,
-                     kernel_shape: [5, 5],
-                     pool_shape: [2, 2],
-                     pool_stride: [2, 2],
-                 }, !obj:pylearn2.models.mlp.ConvRectifiedLinear {
-                     layer_name: 'h1',
-                     output_channels: 128,
-                     irange: .05,
-                     kernel_shape: [5, 5],
-                     pool_shape: [2, 2],
-                     pool_stride: [2, 2],
-                 }, !obj:pylearn2.models.mlp.ConvRectifiedLinear {
-                     layer_name: 'h2',
-                     output_channels: 128,
-                     irange: .05,
-                     kernel_shape: [5, 5],
-                     pool_shape: [1, 1],
-                     pool_stride: [1, 1],
-                 }, !obj:pylearn2.models.mlp.RectifiedLinear {
-                     layer_name: 'f1',
-                     dim: 2048,
-                     istdev: 0.0005,
-                 }, !obj:pylearn2.models.mlp.Linear {
-                     layer_name: 'y',
-                     istdev: 0.0005,
-                     dim: 1,
-                 }
-                ],
+    model: !obj:pylearn2.monitor.push_monitor {
+      model: !pkl: /home/lein/Work/sar_dnn/dataset/beaufort_gsl/gsl_conv_best_3conv.pkl,
+      name: "monitor_stage_0"
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
         batch_size: 128,

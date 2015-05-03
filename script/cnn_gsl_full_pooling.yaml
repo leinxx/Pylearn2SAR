@@ -8,7 +8,7 @@
             data_file_list: 'train.txt',
             preprocessor : !obj:preprocessing_standarize.Standardize {
               mean_std_file: '/home/lein/Work/sar_dnn/dataset/beaufort_gsl/mean_std_gsl_3conv.pkl'}, #it has to be full file path 
-            fit_preprocessor: True,
+            fit_preprocessor: False,
         },
         transformer : !obj:transformer.TransformationPipeline { 
             input_space: !obj:pylearn2.space.Conv2DSpace {
@@ -45,9 +45,9 @@
                      layer_name: 'h2',
                      output_channels: 128,
                      irange: .05,
-                     kernel_shape: [5, 5],
-                     pool_shape: [1, 1],
-                     pool_stride: [1, 1],
+                     kernel_shape: [3, 3],
+                     pool_shape: [2, 2],
+                     pool_stride: [2, 2],
                  }, !obj:pylearn2.models.mlp.RectifiedLinear {
                      layer_name: 'f1',
                      dim: 2048,

@@ -83,4 +83,6 @@ if __name__ == '__main__':
     image_dir = '/home/lein/Work/Sea_ice/gsl2014_hhv_ima/'
     image_subfix = ['-HH-8by8-mat.tif', '-HV-8by8-mat.tif']
     mask_subfix = '-mask.tif'
+    mask_dir = '/home/lein/Work/Sea_ice/gsl2014_hhv_ima/'
+
     gen_land_free_data(image_dir, image_subfix, mask_subfix, image_dir)

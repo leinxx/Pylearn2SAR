@@ -57,7 +57,9 @@ def sar_predict(ann,image,outfile):
     batch_size = ann.batch_size
     yaml_src = ann.dataset_yaml_src.split()
     mean_std_file = yaml_src[yaml_src.index('mean_std_file:')+1]
-    mean_std_file = re.search('\w+...\w+', mean_std_file).group(0)
+    # mean_std_file = re.search('\w+...\w+', mean_std_file).group(0)
+    mean_std_file = mean_std_file[1:-3]
+    print "mean_std_file:" + mean_std_file
     preprocessor = Standardize(mean_std_file = mean_std_file)
     # ann.set_batch_size(batch_size)
     m = len(jcol)*len(irow)
